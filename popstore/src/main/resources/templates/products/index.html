@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Products</title>
+</head>
+<body>
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <h1 class="mb-0">Shoe Collection</h1>
+        <div>
+            <a class="btn btn-outline-secondary" href="/">Home</a>
+            <a class="btn btn-success" th:href="@{/products/create}">+ New Shoe</a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(products)}">
+                <td colspan="9" class="text-center text-muted py-4">No products yet. Click "New Shoe" to add one.</td>
+            </tr>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.id}">1</td>
+                <td>
+                    <img th:src="@{/products/images/{file}(file=${product.imageFileName})}"
+                         th:alt="${product.name}" width="80" class="img-thumbnail"
+                         style="cursor: zoom-in"
+                         data-bs-toggle="modal" data-bs-target="#imageModal"
+                         th:data-src="@{/products/images/{file}(file=${product.imageFileName})}"
+                         th:data-name="${product.name}"
+                         th:data-brand="${product.brand}"
+                         th:data-desc="${product.description}"
+                         th:data-price="${#numbers.formatDecimal(product.price, 1, 'WHITESPACE', 2, 'POINT')}">
+                </td>
+                <td th:text="${product.name}">Name</td>
+                <td th:text="${product.brand}">Brand</td>
+                <td th:text="${product.category}">Category</td>
+                <td th:text="'R ' + ${#numbers.formatDecimal(product.price, 1, 'WHITESPACE', 2, 'POINT')}">R 0.00</td>
+                <td style="max-width: 260px" th:text="${product.description}">Description</td>
+                <td th:text="${#dates.format(product.createdAt, 'dd MMM yyyy')}">Date</td>
+                <td style="white-space: nowrap">
+                    <a class="btn btn-primary btn-sm"
+                       th:href="@{/products/edit(id=${product.id})}">Edit</a>
+
+                    <form th:action="@{/products/delete(id=${product.id})}" method="post" class="d-inline"
+                          onsubmit="return confirm('Are you sure you want to delete this product?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+
+                        <!-- Image viewer -->
+                        <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div>
+                                            <h5 class="modal-title" id="modalName"></h5>
+                                            <small class="text-muted" id="modalBrand"></small>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img id="modalImage" src="" alt="" class="img-fluid" style="max-height: 70vh; object-fit: contain">
+                                    </div>
+                                    <div class="modal-footer justify-content-between">
+                                        <span class="text-muted" id="modalDesc"></span>
+                                        <span class="fs-4 fw-bold" id="modalPrice"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                        <script>
+                            document.getElementById('imageModal').addEventListener('show.bs.modal', function (event) {
+                                var img = event.relatedTarget;   // the thumbnail that was clicked
+                                document.getElementById('modalImage').src = img.dataset.src;
+                                document.getElementById('modalImage').alt = img.dataset.name;
+                                document.getElementById('modalName').textContent = img.dataset.name;
+                                document.getElementById('modalBrand').textContent = img.dataset.brand;
+                                document.getElementById('modalDesc').textContent = img.dataset.desc;
+                                document.getElementById('modalPrice').textContent = 'R ' + img.dataset.price;
+                            });
+                        </script>
+
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
